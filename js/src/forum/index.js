@@ -1,0 +1,86 @@
+import { extend, override } from 'flarum/common/extend';
+import app from 'flarum/forum/app';
+import DiscussionControls from 'flarum/utils/DiscussionControls';
+import DiscussionPage from 'flarum/components/DiscussionPage';
+import EditPostComposer from 'flarum/components/EditPostComposer';
+import LogInModal from 'flarum/components/LogInModal';
+import Model from 'flarum/Model';
+import ReplyComposer from 'flarum/components/ReplyComposer';
+import User from 'flarum/models/User';
+
+app.initializers.add(
+  'the-turk-nodp',
+  () => {
+    User.prototype.canDoublePost = Model.attribute('canDoublePost');
+
+    const isDoublePosting = (discussion, user) => {
+      if (!discussion || !user || user.canDoublePost()) return false;
+
+      const lastPostedUser = discussion.lastPostedUser();
+      const lastPostedAt = discussion.lastPostedAt();
+
+      const timeLimit = app.forum.attribute('nodp.time_limit'); // in minutes
+      const isExpired = dayjs(lastPostedAt.getTime()).add(timeLimit, 'minute').isBefore(dayjs());
+
+      return timeLimit == 0 || (!isExpired && lastPostedUser == user) ? true : false;
+    };
+
+    // Add a warning message.
+    extend(EditPostComposer.prototype, 'headerItems', function (items) {
+      if (!isDoublePosting(this.attrs.post.discussion(), app.session.user)) return;
+
+      items.add(
+        'nodp',
+        <div className="Alert">
+          <div className="Alert-body">
+            <h4>{app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_title')}</h4>
+            <p>{app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_description')}</p>
+          </div>
+        </div>
+      );
+    });
+
+    // We need to override replyAction directly to support `flarum/mentions`.
+    override(DiscussionControls, 'replyAction', function (goToLast, forceRefresh) {
+      const user = app.session.user;
+
+      return new Promise((resolve, reject) => {
+        if (user) {
+          if (isDoublePosting(this, user)) {
+            app.composer.load(EditPostComposer, { post: this.lastPost() });
+            app.composer.show();
+
+            // showing the alert like this because what will happen
+            // if you're just editing a post instead of attempting double posting?
+            $('body').find('.item-nodp').css('display', 'block');
+
+            return resolve(app.composer);
+          }
+
+          if (this.canReply()) {
+            if (!app.composer.composingReplyTo(this) || forceRefresh) {
+              app.composer.load(ReplyComposer, {
+                user,
+                discussion: this,
+              });
+            }
+            app.composer.show();
+
+            if (goToLast && app.viewingDiscussion(this) && !app.composer.isFullScreen()) {
+              app.current.get('stream').goToNumber('reply');
+            }
+
+            return resolve(app.composer);
+          } else {
+            return reject();
+          }
+        }
+
+        app.modal.show(LogInModal);
+
+        return reject();
+      });
+    });
+  },
+  -10
+);

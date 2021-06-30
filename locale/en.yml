@@ -1,0 +1,25 @@
+the-turk-nodp:
+
+  ##
+  # UNIQUE KEYS - The following keys are used in only one location each.
+  ##
+
+  # Translations in this namespace are used by the admin interface.
+  admin:
+
+    # These translations are used in the Permissions page of the admin interface.
+    permissions:
+      double_posting_label: Double Posting
+
+    # These translations are used in the Settings page.
+    settings:
+      time_limit_label: Time Limit
+      time_limit_text: If more than <b>xxx</b> minutes have passed since the last post in a discussion, the last poster will be forced to edit their post. Set this to <b>0</b> to disable the time limit.
+
+  # Translations in this namespace are used by the forum user interface.
+  forum:
+
+    # These translations are used by the composer when editing a post.
+    composer_edit:
+      double_posting_warning_title: You are the last poster of this discussion.
+      double_posting_warning_description: As you've already replied to this discussion short while ago, please revise your last post instead of creating a new one.
