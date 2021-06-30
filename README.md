@@ -4,8 +4,8 @@
 
 Prevents users from double posting into discussions by forcing them to edit their last post in a specified time limit.
 
-![](https://i.imgur.com/CJpmDU6.png)
-
+Screenshots:
+- [Composer](https://i.imgur.com/CJpmDU6.png)
 - [Settings](https://i.imgur.com/Ks0jIHY.png)
 
 See it in action:
