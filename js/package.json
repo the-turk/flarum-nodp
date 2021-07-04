@@ -1,7 +1,7 @@
 {
   "name": "@the-turk/flarum-nodp",
   "description": "Prevent double posting into discussions.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dependencies": {
     "flarum-webpack-config": "0.1.0-beta.16.2",
     "webpack": "^4.46.0",

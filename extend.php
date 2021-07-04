@@ -29,7 +29,7 @@ return [
     (new Extend\Locales(__DIR__.'/locale')),
 
     (new Extend\Event())
-        ->listen(PostSaving::class, Listener\CheckDoublePosting::class),
+        ->listen(PostSaving::class, Listener\DoublePosting::class),
 
     (new Extend\ApiSerializer(CurrentUserSerializer::class))
         ->attributes(function (CurrentUserSerializer $serializer) {
@@ -40,7 +40,7 @@ return [
 
     (new Extend\ApiController(ShowDiscussionController::class))
         ->addInclude('lastPost')
-        ->addInclude('lastPostedUser'),     
+        ->addInclude('lastPostedUser'),
 
     (new Extend\Settings())
         ->serializeToForum('nodp.time_limit', 'the-turk-nodp.time_limit')

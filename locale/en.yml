@@ -23,3 +23,7 @@ the-turk-nodp:
     composer_edit:
       double_posting_warning_title: You are the last poster of this discussion.
       double_posting_warning_description: As you've already replied to this discussion short while ago, please revise your last post instead of creating a new one.
+
+    # Translations in this namespace are displayed in the discussion.
+    discussion:
+      cannot_reply_alert_message: You can't reply to this discussion until someone else replies.

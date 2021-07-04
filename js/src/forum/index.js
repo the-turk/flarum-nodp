@@ -1,7 +1,7 @@
 import { extend, override } from 'flarum/common/extend';
 import app from 'flarum/forum/app';
+import Alert from 'flarum/common/components/Alert';
 import DiscussionControls from 'flarum/utils/DiscussionControls';
-import DiscussionPage from 'flarum/components/DiscussionPage';
 import EditPostComposer from 'flarum/components/EditPostComposer';
 import LogInModal from 'flarum/components/LogInModal';
 import Model from 'flarum/Model';
@@ -27,8 +27,6 @@ app.initializers.add(
 
     // Add a warning message.
     extend(EditPostComposer.prototype, 'headerItems', function (items) {
-      if (!isDoublePosting(this.attrs.post.discussion(), app.session.user)) return;
-
       items.add(
         'nodp',
         <div className="Alert">
@@ -47,14 +45,24 @@ app.initializers.add(
       return new Promise((resolve, reject) => {
         if (user) {
           if (isDoublePosting(this, user)) {
-            app.composer.load(EditPostComposer, { post: this.lastPost() });
-            app.composer.show();
+            const post = this.lastPost();
 
-            // showing the alert like this because what will happen
-            // if you're just editing a post instead of attempting double posting?
-            $('body').find('.item-nodp').css('display', 'block');
+            if (post.contentType() === 'comment' && post.canEdit()) {
+              app.composer.load(EditPostComposer, { post });
+              app.composer.show();
 
-            return resolve(app.composer);
+              // showing the composer message like this because what will happen
+              // if you're just editing a post instead of attempting double posting?
+              $('body').find('.item-nodp').css('display', 'block');
+
+              return resolve(app.composer);
+            }
+
+            // user can't edit their post
+            // and not allowed to double post.
+            app.alerts.show(Alert, { type: 'error' }, app.translator.trans('the-turk-nodp.forum.discussion.cannot_reply_alert_message'));
+
+            return reject();
           }
 
           if (this.canReply()) {
