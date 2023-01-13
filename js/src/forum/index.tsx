@@ -1,19 +1,20 @@
 import { extend, override } from 'flarum/common/extend';
 import app from 'flarum/forum/app';
 import Alert from 'flarum/common/components/Alert';
-import DiscussionControls from 'flarum/utils/DiscussionControls';
-import EditPostComposer from 'flarum/components/EditPostComposer';
-import LogInModal from 'flarum/components/LogInModal';
-import Model from 'flarum/Model';
-import ReplyComposer from 'flarum/components/ReplyComposer';
-import User from 'flarum/models/User';
+import DiscussionControls from 'flarum/forum/utils/DiscussionControls';
+import EditPostComposer from 'flarum/forum/components/EditPostComposer';
+import LogInModal from 'flarum/forum/components/LogInModal';
+import Model from 'flarum/common/Model';
+import ReplyComposer from 'flarum/forum/components/ReplyComposer';
+import User from 'flarum/common/models/User';
+import Discussion from 'flarum/common/models/Discussion';
 
 app.initializers.add(
   'the-turk-nodp',
   () => {
     User.prototype.canDoublePost = Model.attribute('canDoublePost');
 
-    const isDoublePosting = (discussion, user) => {
+    const isDoublePosting = (discussion: Discussion, user: User) => {
       if (!discussion || !user || user.canDoublePost()) return false;
 
       const lastPostedUser = discussion.lastPostedUser();

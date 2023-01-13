@@ -1,6 +1,6 @@
 import app from 'flarum/admin/app';
 
-app.initializers.add('the-turk-nodp', (app) => {
+app.initializers.add('the-turk-nodp', () => {
   app.extensionData
     .for('the-turk-nodp')
     .registerSetting({
