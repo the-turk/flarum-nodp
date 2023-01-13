@@ -39,7 +39,7 @@ class DoublePosting
         $lastPost = $post->discussion->lastPost;
 
         if (!$lastPost) return;
-        
+
         if ($this->willDoublePost($event->actor, $lastPost)) throw new PermissionDeniedException();
     }
 
@@ -66,7 +66,7 @@ class DoublePosting
             $lastPost = $hiddenLastPost === null ? $lastPost : $hiddenLastPost;
 
             if ($actor->cannot('edit', $lastPost)) return false;
-            
+
             if ($actor->id == $lastPost->user_id) {
                 $timeLimit = $this->settings->get('the-turk-nodp.time_limit', 1440);
 
