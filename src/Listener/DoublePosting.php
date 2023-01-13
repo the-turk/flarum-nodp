@@ -68,7 +68,7 @@ class DoublePosting
             if ($actor->cannot('edit', $lastPost)) return false;
 
             if ($actor->id == $lastPost->user_id) {
-                $timeLimit = $this->settings->get('the-turk-nodp.time_limit', 1440);
+                $timeLimit = $this->settings->get('the-turk-nodp.time_limit');
 
                 $isExpired = Carbon::parse($lastPost->created_at)->addMinutes($timeLimit)->isPast();
 
