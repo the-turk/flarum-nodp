@@ -6,6 +6,7 @@ import EditPostComposer from 'flarum/forum/components/EditPostComposer';
 import Model from 'flarum/common/Model';
 import User from 'flarum/common/models/User';
 import Post from 'flarum/common/models/Post';
+import ComposerBody from 'flarum/forum/components/ComposerBody';
 
 app.initializers.add(
   'the-turk-nodp',
@@ -25,8 +26,8 @@ app.initializers.add(
     };
 
     // Add a warning message.
-    extend(EditPostComposer.prototype, 'headerItems', function (items) {
-      if (!isDoublePosting(this.attrs.post, this.attrs.user)) return
+    extend(ComposerBody.prototype, 'headerItems', function (items) {
+      if (!this.attrs.nodp) return
 
       const title = app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_title');
       const description = app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_description');
@@ -50,7 +51,7 @@ app.initializers.add(
       if (!isDoublePosting(post, user)) return
 
       if (post && post.contentType() === 'comment' && post.canEdit()) {
-        app.composer.load(EditPostComposer, { post });
+        app.composer.load(EditPostComposer, { post, nodp: true });
         app.composer.show();
 
         return
