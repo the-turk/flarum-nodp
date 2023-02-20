@@ -1,4 +1,4 @@
-import { extend, override } from 'flarum/common/extend';
+import { extend } from 'flarum/common/extend';
 import app from 'flarum/forum/app';
 import Alert from 'flarum/common/components/Alert';
 import DiscussionControls from 'flarum/forum/utils/DiscussionControls';
@@ -26,7 +26,7 @@ app.initializers.add(
 
     // Add a warning message.
     extend(EditPostComposer.prototype, 'headerItems', function (items) {
-      if (!this.attrs.nodp) return;
+      if (!isDoublePosting(this.attrs.post, this.attrs.user)) return
 
       const title = app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_title');
       const description = app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_description');
@@ -39,32 +39,25 @@ app.initializers.add(
       );
     });
 
-    // We need to override replyAction directly to support `flarum/mentions`.
-    override(DiscussionControls, 'replyAction', function (original, goToLast, forceRefresh) {
+    extend(DiscussionControls, 'replyAction', function (promise) {
       const user = app.session.user;
 
-      if (!user) return original(goToLast, forceRefresh);
+      if (!user) return
 
-      return new Promise((resolve, reject) => {
-        const posts: Array<Post> = app.current.get('stream').posts();
-        const post = posts[posts.length - 1];
+      const posts: Array<Post> = app.current.get('stream').posts();
+      const post = posts[posts.length - 1];
 
-        if (!isDoublePosting(post, user)) return original(goToLast, forceRefresh);
+      if (!isDoublePosting(post, user)) return
 
-        if (post && post.contentType() === 'comment' && post.canEdit()) {
-          app.composer.load(EditPostComposer, { post, nodp: true });
-          app.composer.show();
+      if (post && post.contentType() === 'comment' && post.canEdit()) {
+        app.composer.load(EditPostComposer, { post });
+        app.composer.show();
 
-          return resolve(app.composer);
-        }
+        return
+      }
 
-        // user can't edit their post
-        // and not allowed to double post.
-        app.alerts.show(Alert, { type: 'error' }, app.translator.trans('the-turk-nodp.forum.discussion.cannot_reply_alert_message'));
-
-        return reject();
-      });
-    });
+      app.alerts.show(Alert, { type: 'error' }, app.translator.trans('the-turk-nodp.forum.discussion.cannot_reply_alert_message'));
+    })
   },
   -10
 );
