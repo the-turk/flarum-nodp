@@ -13,9 +13,11 @@
 namespace TheTurk\NoDP;
 
 use Flarum\Extend;
-use Flarum\Api\Serializer\CurrentUserSerializer;
+use Flarum\Api\Serializer\DiscussionSerializer;
+use Flarum\Discussion\Discussion;
 use Flarum\Post\Event\Saving as PostSaving;
-use Flarum\User\User;
+use TheTurk\NoDP\Api\Serializer\DiscussionAttributes;
+use TheTurk\NoDP\Discussion\Access\DiscussionDoublePostPolicy;
 use TheTurk\NoDP\Listener;
 
 return [
@@ -30,14 +32,13 @@ return [
 
     (new Extend\Event())
         ->listen(PostSaving::class, Listener\DoublePosting::class),
-
-    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-        ->attributes(function (CurrentUserSerializer $serializer, User $user, array $attributes) {
-            $attributes['canDoublePost'] = $serializer->getActor()->hasPermission('discussion.doublePost');
-
-            return $attributes;
-        }),
+        
+    (new Extend\ApiSerializer(DiscussionSerializer::class))
+        ->attributes(DiscussionAttributes::class),
 
     (new Extend\Settings())
-        ->serializeToForum('nodp.time_limit', 'the-turk-nodp.time_limit')
+        ->serializeToForum('nodp.time_limit', 'the-turk-nodp.time_limit'),
+
+    (new Extend\Policy)
+        ->modelPolicy(Discussion::class, DiscussionDoublePostPolicy::class)
 ];
