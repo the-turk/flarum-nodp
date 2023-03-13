@@ -26,17 +26,21 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
     protected function doublePost(User $user, Discussion $discussion)
     {
         return $user->hasPermission('discussion.doublePost')
-            || $this->checkLastPost($user, $discussion);
+            || $this->canDoublePost($user, $discussion);
     }
 
-    private function checkLastPost(User $user, Discussion $discussion): bool
+    private function canDoublePost(User $user, Discussion $discussion): bool
     {
         $lastPost = $discussion->lastPost;
 
         if (!($lastPost instanceof CommentPost)) return true;
 
-        // Prevent users from by-passing the double-posting check
-        // by soft-deleting and restoring their previous post.
+        /**
+         * Prevent users from by-passing the double-posting check
+         * by soft-deleting and restoring their previous post.
+         * 
+         * @var \Flarum\Post\Post
+         */
         $hiddenPost = $discussion->posts()
             ->where('user_id', $user->id)
             ->where('created_at', '>=', $discussion->last_posted_at)
@@ -49,16 +53,14 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
             $lastPost = $hiddenPost;
         }
 
-        if ($user->cannot('edit', $lastPost)) return true;
-
         if ($lastPost->user_id != $user->id) return true;
 
-        $timeLimit = $this->settings->get('the-turk-nodp.time_limit');
+        if ($user->cannot('edit', $lastPost)) return true;
+
+        $timeLimit = (int) $this->settings->get('the-turk-nodp.time_limit');
 
         if ($timeLimit == 0) return false;
 
-        $isExpired = $lastPost->created_at->addMinutes($timeLimit)->isPast();
-
-        return $isExpired;
+        return $lastPost->created_at->addMinutes($timeLimit)->isPast();
     }
 }
