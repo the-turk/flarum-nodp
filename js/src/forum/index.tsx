@@ -11,11 +11,11 @@ import Discussion from 'flarum/common/models/Discussion';
 app.initializers.add(
   'the-turk-nodp',
   () => {
-    Discussion.prototype.canDoublePost = Model.attribute('canDoublePost')
+    Discussion.prototype.canDoublePost = Model.attribute('canDoublePost');
 
     // Add a warning message.
     extend(ComposerBody.prototype, 'headerItems', function (items) {
-      if (!this.attrs.nodp) return
+      if (!this.attrs.nodp) return;
 
       const title = app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_title');
       const description = app.translator.trans('the-turk-nodp.forum.composer_edit.double_posting_warning_description');
@@ -24,18 +24,19 @@ app.initializers.add(
         'nodp',
         <Alert dismissible={false} title={title} type="warning">
           {description}
-        </Alert>
+        </Alert>,
+        -10
       );
     });
 
     extend(DiscussionControls, 'replyAction', function () {
-      const user = app.session.user
+      const user = app.session.user;
 
-      if (!user) return
+      if (!user) return;
 
-      const stream = app.current.get('stream')
+      const stream = app.current.get('stream');
 
-      if (stream.discussion.canDoublePost()) return
+      if (stream.discussion.canDoublePost()) return;
 
       const posts: Array<Post> = stream.posts();
       const post = posts[posts.length - 1];
@@ -44,14 +45,14 @@ app.initializers.add(
         app.composer.load(EditPostComposer, { post, nodp: true });
         app.composer.show();
 
-        return
+        return;
       }
 
       // user can't edit their post
       // and not allowed to double post.
       app.alerts.show(Alert, { type: 'error' }, app.translator.trans('the-turk-nodp.forum.discussion.cannot_reply_alert_message'));
-      app.composer.close()
-    })
+      app.composer.close();
+    });
   },
   -10
 );
