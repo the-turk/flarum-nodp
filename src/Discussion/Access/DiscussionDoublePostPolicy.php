@@ -55,7 +55,7 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
 
         if ($lastPost->user_id != $user->id) return true;
 
-        if ($user->cannot('edit', $lastPost)) return true;
+        if ($user->cannot('edit', $lastPost)) return false;
 
         $timeLimit = (int) $this->settings->get('the-turk-nodp.time_limit');
 
