@@ -41,7 +41,7 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
          * 
          * @var \Flarum\Post\Post
          */
-        $hiddenPost = $discussion->posts()
+        $hiddenPost = $discussion->posts
             ->where('user_id', $user->id)
             ->where('created_at', '>=', $discussion->last_posted_at)
             ->whereNotNull('hidden_at')
