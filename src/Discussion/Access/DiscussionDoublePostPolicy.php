@@ -3,7 +3,6 @@
 namespace TheTurk\NoDP\Discussion\Access;
 
 use Flarum\Discussion\Discussion;
-use Flarum\Post\CommentPost;
 use Flarum\Post\Post;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\Access\AbstractPolicy;
@@ -31,39 +30,26 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
 
     private function canDoublePost(User $actor, Discussion $discussion): bool
     {
-        $lastPost = $discussion->lastPost;
+        /**
+         * @var ?Post
+         */
+        $lastPost = $discussion->posts()
+            ->where('type', 'comment')
+            ->latest()
+            ->limit(1)
+            ->first();
 
-        if ($lastPost instanceof CommentPost) {
-            if ($actor->hasPermission('discussion.doublePost')) return true;
+        if ($actor->hasPermission('discussion.doublePost')) return true;
 
-            /**
-             * Prevent users from by-passing the double-posting check
-             * by soft-deleting and restoring their previous post.
-             * 
-             * @var ?Post
-             */
-            $hiddenLastPost = Post::where('user_id', $actor->id)
-                ->where('discussion_id', $lastPost->discussion->id)
-                ->where('created_at', '>=', $lastPost->created_at)
-                ->whereNotNull('hidden_at')
-                ->whereColumn('hidden_user_id', 'user_id')
-                ->orderBy('hidden_at', 'desc')
-                ->first();
+        // what is this ?!
+        // if ($actor->cannot('edit', $lastPost)) return true;
+        
+        if ($actor->id == $lastPost->user_id) {
+            $timeLimit = $this->settings->get('the-turk-nodp.time_limit');
 
-            if (!is_null($hiddenLastPost)) {
-                $lastPost = $hiddenLastPost;
-            }
+            $isExpired = $lastPost->created_at->addMinutes($timeLimit)->isPast();
 
-            // what is this ?!
-            // if ($actor->cannot('edit', $lastPost)) return true;
-            
-            if ($actor->id == $lastPost->user_id) {
-                $timeLimit = $this->settings->get('the-turk-nodp.time_limit');
-
-                $isExpired = $lastPost->created_at->addMinutes($timeLimit)->isPast();
-
-                if ($timeLimit == 0 || !$isExpired) return false;
-            }
+            if ($timeLimit == 0 || !$isExpired) return false;
         }
 
         return true;
