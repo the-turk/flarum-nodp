@@ -38,20 +38,25 @@ app.initializers.add(
 
       if (stream.discussion.canDoublePost()) return;
 
-      const posts: Array<Post> = stream.posts();
+      const posts: Array<Post> = stream.posts()
+        .filter((post: Post) => {
+          return post.contentType() === "comment" && post.user().id() === user.id()
+        });
+
+      if (!posts.length) return;
+
+      // last post
       const post = posts[posts.length - 1];
 
-      if (post && post.contentType() === 'comment' && post.canEdit()) {
+      if (post?.canEdit()) {
         app.composer.load(EditPostComposer, { post, nodp: true });
         app.composer.show();
-
-        return;
+      } else {
+        // user can't edit their post
+        // and not allowed to double post.
+        app.alerts.show(Alert, { type: 'error' }, app.translator.trans('the-turk-nodp.forum.discussion.cannot_reply_alert_message'));
+        app.composer.close();
       }
-
-      // user can't edit their post
-      // and not allowed to double post.
-      app.alerts.show(Alert, { type: 'error' }, app.translator.trans('the-turk-nodp.forum.discussion.cannot_reply_alert_message'));
-      app.composer.close();
     });
   },
   -10
