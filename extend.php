@@ -43,5 +43,6 @@ return [
         ->addInclude('lastPostedUser'),
 
     (new Extend\Settings())
+        ->default('the-turk-nodp.time_limit', 1440)
         ->serializeToForum('nodp.time_limit', 'the-turk-nodp.time_limit')
 ];
