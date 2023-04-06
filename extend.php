@@ -12,8 +12,8 @@
 
 namespace TheTurk\NoDP;
 
+use Flarum\Api\Serializer\DiscussionSerializer;
 use Flarum\Extend;
-use Flarum\Api\Serializer\CurrentUserSerializer;
 use Flarum\Discussion\Discussion;
 use Flarum\Post\Event\Saving as PostSaving;
 use TheTurk\NoDP\Discussion\Access\DiscussionDoublePostPolicy;
@@ -32,8 +32,8 @@ return [
     (new Extend\Event())
         ->listen(PostSaving::class, Listener\DoublePosting::class),
 
-    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-        ->attributes(function (CurrentUserSerializer $serializer, Discussion $discussion, array $attributes) {
+    (new Extend\ApiSerializer(DiscussionSerializer::class))
+        ->attributes(function (DiscussionSerializer $serializer, Discussion $discussion, array $attributes) {
             $attributes['canDoublePost'] = $serializer->getActor()->can('doublePost', $discussion);
 
             return $attributes;
