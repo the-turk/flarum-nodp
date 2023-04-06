@@ -1,14 +1,15 @@
 {
   "name": "@the-turk/flarum-nodp",
   "description": "Prevent double posting into discussions.",
-  "version": "1.0.1",
-  "dependencies": {
-    "flarum-webpack-config": "0.1.0-beta.16.2",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^4.7.0"
-  },
+  "version": "0.0.0",
+  "private": true,
   "devDependencies": {
-    "prettier": "^2.3.1"
+    "@flarum/prettier-config": "^1.0.0",
+    "flarum-tsconfig": "^1.0.2",
+    "flarum-webpack-config": "^2.0.0",
+    "prettier": "^2.5.1",
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.9.1"
   },
   "repository": {
     "type": "git",
