@@ -23,9 +23,9 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
         $this->settings = $settings;
     }
 
-    protected function doublePost(User $user, Discussion $discussion)
+    protected function doublePost(User $actor, Discussion $discussion)
     {
-        return $this->canDoublePost($user, $discussion);
+        return $this->canDoublePost($actor, $discussion);
     }
 
     private function canDoublePost(User $actor, Discussion $discussion): bool
@@ -38,7 +38,6 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
         $lastPost = $discussion->posts()
             ->where('type', 'comment')
             ->latest()
-            ->limit(1)
             ->first();
 
         if ($actor->id !== $lastPost->user_id) return true;

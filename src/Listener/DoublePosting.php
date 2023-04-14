@@ -15,11 +15,12 @@ class DoublePosting
     {
         $post = $event->post;
 
+        // new discussion
+        if (is_null($post->discussion->first_post_id)) return;
+
         // can't double post while editing
         if ($post->exists) return;
 
-        if (is_null($post->discussion->lastPost)) return;
-
-        if ($event->actor->cannot('doublePost', $post->discussion)) throw new PermissionDeniedException();
+        $event->actor->assertCan('doublePost', $post->discussion);
     }
 }
