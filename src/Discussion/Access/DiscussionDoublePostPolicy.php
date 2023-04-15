@@ -23,15 +23,15 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
         $this->settings = $settings;
     }
 
-    public function doublePost(User $actor, Discussion $discussion)
+    /**
+     * This ends with 'Custom' because we don't want to override
+     * the 'doublePost' policy, that runs some checks we need
+     * like if we have a tag-scoped permission (flarum-tags).
+     *
+     * If you have a better name/approach, you are welcome.
+     */
+    public function doublePostCustom(User $actor, Discussion $discussion)
     {
-        return $this->canDoublePost($actor, $discussion);
-    }
-
-    private function canDoublePost(User $actor, Discussion $discussion)
-    {
-        if ($actor->hasPermission('discussion.doublePost')) return $this->forceAllow();
-
         /**
          * @var Post
          */
@@ -40,14 +40,14 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
             ->latest()
             ->first();
 
-        if ($actor->id !== $lastPost->user_id) return $this->forceAllow();
+        if ($actor->id !== $lastPost->user_id) return $this->allow();
 
-        if ($actor->cannot('edit', $lastPost)) return $this->forceAllow();
+        if ($actor->cannot('edit', $lastPost)) return $this->allow();
 
         $timeLimit = (int) $this->settings->get('the-turk-nodp.time_limit');
 
-        if ($timeLimit === 0) return $this->forceDeny();
+        if ($timeLimit === 0) return $this->deny();
 
-        return $lastPost->created_at->addMinutes($timeLimit)->isPast() ? $this->forceAllow() : $this->forceDeny();
+        return $lastPost->created_at->addMinutes($timeLimit)->isPast() ? $this->allow() : $this->deny();
     }
 }

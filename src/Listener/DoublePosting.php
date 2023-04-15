@@ -21,6 +21,8 @@ class DoublePosting
         // can't double post while editing
         if ($post->exists) return;
 
-        $event->actor->assertCan('doublePost', $post->discussion);
+        if (!($event->actor->can('doublePost', $post->discussion) || $event->actor->can('doublePostCustom', $post->discussion))) {
+            throw new PermissionDeniedException();
+        }
     }
 }

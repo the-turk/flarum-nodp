@@ -34,7 +34,7 @@ return [
 
     (new Extend\ApiSerializer(DiscussionSerializer::class))
         ->attributes(function (DiscussionSerializer $serializer, Discussion $discussion, array $attributes) {
-            $attributes['canDoublePost'] = $serializer->getActor()->can('doublePost', $discussion);
+            $attributes['canDoublePost'] = $serializer->getActor()->can('doublePost', $discussion) || $serializer->getActor()->can('doublePostCustom', $discussion);
 
             return $attributes;
         }),
