@@ -23,14 +23,14 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
         $this->settings = $settings;
     }
 
-    protected function doublePost(User $actor, Discussion $discussion)
+    public function doublePost(User $actor, Discussion $discussion)
     {
         return $this->canDoublePost($actor, $discussion);
     }
 
-    private function canDoublePost(User $actor, Discussion $discussion): bool
+    private function canDoublePost(User $actor, Discussion $discussion)
     {
-        if ($actor->hasPermission('discussion.doublePost')) return true;
+        if ($actor->hasPermission('discussion.doublePost')) return $this->forceAllow();
 
         /**
          * @var Post
@@ -40,14 +40,14 @@ class DiscussionDoublePostPolicy extends AbstractPolicy
             ->latest()
             ->first();
 
-        if ($actor->id !== $lastPost->user_id) return true;
+        if ($actor->id !== $lastPost->user_id) return $this->forceAllow();
 
-        if ($actor->cannot('edit', $lastPost)) return true;
+        if ($actor->cannot('edit', $lastPost)) return $this->forceAllow();
 
         $timeLimit = (int) $this->settings->get('the-turk-nodp.time_limit');
 
-        if ($timeLimit === 0) return false;
+        if ($timeLimit === 0) return $this->forceDeny();
 
-        return $lastPost->created_at->addMinutes($timeLimit)->isPast();
+        return $lastPost->created_at->addMinutes($timeLimit)->isPast() ? $this->forceAllow() : $this->forceDeny();
     }
 }
