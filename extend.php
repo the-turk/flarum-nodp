@@ -16,7 +16,6 @@ use Flarum\Api\Serializer\DiscussionSerializer;
 use Flarum\Extend;
 use Flarum\Discussion\Discussion;
 use Flarum\Post\Event\Saving as PostSaving;
-use TheTurk\NoDP\Discussion\Access\DiscussionDoublePostPolicy;
 use TheTurk\NoDP\Listener;
 
 return [
@@ -34,14 +33,11 @@ return [
 
     (new Extend\ApiSerializer(DiscussionSerializer::class))
         ->attributes(function (DiscussionSerializer $serializer, Discussion $discussion, array $attributes) {
-            $attributes['canDoublePost'] = $serializer->getActor()->can('doublePost', $discussion) || $serializer->getActor()->can('doublePostCustom', $discussion);
+            $attributes['canDoublePost'] = Helpers::canDoublePost($serializer->getActor(), $discussion);
 
             return $attributes;
         }),
 
     (new Extend\Settings())
         ->default('the-turk-nodp.time_limit', 1440),
-
-    (new Extend\Policy)
-        ->modelPolicy(Discussion::class, DiscussionDoublePostPolicy::class)
 ];

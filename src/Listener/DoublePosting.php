@@ -4,6 +4,7 @@ namespace TheTurk\NoDP\Listener;
 
 use Flarum\Post\Event\Saving as PostSaving;
 use Flarum\User\Exception\PermissionDeniedException;
+use TheTurk\NoDP\Helpers;
 
 class DoublePosting
 {
@@ -21,7 +22,7 @@ class DoublePosting
         // can't double post while editing
         if ($post->exists) return;
 
-        if (!($event->actor->can('doublePost', $post->discussion) || $event->actor->can('doublePostCustom', $post->discussion))) {
+        if (!Helpers::canDoublePost($event->actor, $post->discussion)) {
             throw new PermissionDeniedException();
         }
     }
