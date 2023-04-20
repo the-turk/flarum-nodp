@@ -48,6 +48,11 @@ app.initializers.add(
       const post = posts[posts.length - 1];
 
       if (post?.canEdit()) {
+        // close the old composer if still open
+        if (app.composer.editor != null) {
+          app.composer.close()
+        }
+
         app.composer.load(EditPostComposer, { post, nodp: true });
         app.composer.show();
       } else {
