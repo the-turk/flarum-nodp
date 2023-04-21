@@ -12,9 +12,9 @@
 
 namespace TheTurk\NoDP;
 
+use Flarum\Api\Serializer\DiscussionSerializer;
 use Flarum\Extend;
-use Flarum\Api\Serializer\CurrentUserSerializer;
-use Flarum\Api\Controller\ShowDiscussionController;
+use Flarum\Discussion\Discussion;
 use Flarum\Post\Event\Saving as PostSaving;
 use TheTurk\NoDP\Listener;
 
@@ -31,17 +31,13 @@ return [
     (new Extend\Event())
         ->listen(PostSaving::class, Listener\DoublePosting::class),
 
-    (new Extend\ApiSerializer(CurrentUserSerializer::class))
-        ->attributes(function (CurrentUserSerializer $serializer) {
-            $attributes['canDoublePost'] = $serializer->getActor()->hasPermission('discussion.doublePost');
+    (new Extend\ApiSerializer(DiscussionSerializer::class))
+        ->attributes(function (DiscussionSerializer $serializer, Discussion $discussion, array $attributes) {
+            $attributes['canDoublePost'] = Helpers::canDoublePost($serializer->getActor(), $discussion);
 
             return $attributes;
         }),
 
-    (new Extend\ApiController(ShowDiscussionController::class))
-        ->addInclude('lastPost')
-        ->addInclude('lastPostedUser'),
-
     (new Extend\Settings())
-        ->serializeToForum('nodp.time_limit', 'the-turk-nodp.time_limit')
+        ->default('the-turk-nodp.time_limit', 1440),
 ];
